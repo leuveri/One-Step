@@ -1,3 +1,20 @@
+import { getRandom } from '../data/responses.js'
+
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:3001' : ''
+
+async function classifyMessage(userMessage) {
+  const res = await fetch(`${BASE_URL}/api/claude`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mode: 'classify',
+      userMessage
+    })
+  })
+  const text = await res.text()
+  return text.trim().toLowerCase()
+}
+
 export async function sendMessage({
   mode,
   task,
@@ -5,7 +22,22 @@ export async function sendMessage({
   recentMessages = [],
   awaitingWrapup = false
 }) {
-  const BASE_URL = import.meta.env.DEV ? 'http://localhost:3001' : ''
+  if (mode === 'checkin') {
+    const prewritten = getRandom('checkin')
+    if (prewritten) return { text: prewritten }
+  }
+
+  if (mode === 'conversation') {
+    try {
+      const classification = await classifyMessage(userMessage)
+      if (classification !== 'complex') {
+        const prewritten = getRandom(classification)
+        if (prewritten) return { text: prewritten }
+      }
+    } catch {
+      // fall through to Claude as normal
+    }
+  }
 
   const res = await fetch(`${BASE_URL}/api/claude`, {
     method: 'POST',

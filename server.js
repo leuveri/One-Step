@@ -155,6 +155,19 @@ app.post('/api/claude', async (req, res) => {
   // Build the right prompt for the situation
   let userPrompt
   switch (mode) {
+    case 'classify':
+      userPrompt = `Classify this message into exactly ONE word.
+Message: "${userMessage}"
+Categories:
+- celebrating (done, finished, started, positive progress)
+- concerned (stuck, frustrated, blocked, lost, confused)  
+- checkin (just checking in, vague update, one word replies)
+- wrapup (done for today, enough, stopping, tired, finished for now)
+- encouragement (needs a boost, feeling bad about progress)
+- complex (question, new task, needs real thinking, unclear)
+
+Reply with ONLY the single category word. Nothing else.`
+      break
     case 'start':
       userPrompt = buildStartPrompt(task)
       break
