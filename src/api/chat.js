@@ -5,7 +5,9 @@ export async function sendMessage({
   recentMessages = [],
   awaitingWrapup = false
 }) {
-  const res = await fetch('/api/claude', {
+  const BASE_URL = import.meta.env.DEV ? 'http://localhost:3001' : ''
+
+  const res = await fetch(`${BASE_URL}/api/claude`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mode, task, userMessage, recentMessages, awaitingWrapup })

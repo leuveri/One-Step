@@ -8,3 +8,12 @@ body {
   @apply bg-cream text-warmText font-body antialiased;
 }
 
+.chat-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.chat-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+

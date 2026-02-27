@@ -92,11 +92,13 @@ export default function ChatScreen({
     [onSaveWin]
   )
 
-  const handleSend = async () => {
-    const userText = input.trim()
+  const handleSend = async (overrideText) => {
+    const userText = (overrideText ?? input).trim()
     if (!userText || inputDisabled) return
 
-    setInput('')
+    if (!overrideText) {
+      setInput('')
+    }
     setErrorMessage('')
 
     addMessage({ role: 'user', content: userText })
@@ -166,6 +168,12 @@ export default function ChatScreen({
     if (!isFirstMessage) resetCheckinTimer()
   }
 
+  const handleExampleClick = (exampleText) => {
+    if (isTyping || inputDisabled) return
+    setInput('')
+    handleSend(exampleText)
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -174,9 +182,9 @@ export default function ChatScreen({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-cream">
-      <header className="grid shrink-0 grid-cols-3 items-center gap-2 border-b border-amber-200/50 bg-cream px-4 py-3">
-        <h1 className="font-heading text-lg font-semibold text-warmText">OneStep</h1>
+    <div className="flex h-screen w-full max-w-[680px] flex-col bg-cream mx-auto">
+      <header className="grid shrink-0 grid-cols-3 items-center gap-2 border-b border-amber-200/50 bg-cream px-5 py-4 md:px-6">
+        <h1 className="font-heading text-xl font-bold text-warmText">OneStep</h1>
         <div className="flex justify-center">
           <BodyDoubleIndicator baseCount={bodyDoubleCount} onChange={setBodyDoubleCount} shortLabel />
         </div>
@@ -192,12 +200,40 @@ export default function ChatScreen({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="chat-scroll flex-1 overflow-y-auto px-5 py-6 md:px-6">
         {messages.length === 0 && !isTyping && (
-          <div className="flex min-h-[40vh] items-center justify-center text-center">
-            <p className="font-heading text-base text-neutral-600">
-              hey 👋 what are we tackling today?
-            </p>
+          <div className="flex min-h-[50vh] flex-col items-center justify-center text-center gap-10">
+            <div className="px-2">
+              <p className="font-heading text-4xl font-bold text-warmText md:text-5xl">
+                hey 👋 what are we tackling today?
+              </p>
+              <p className="mt-5 text-lg text-neutral-500 max-w-md mx-auto">
+                tell me what you&apos;ve been avoiding — i&apos;ll help you take one tiny step
+              </p>
+            </div>
+            <div className="w-full max-w-[560px] mx-auto flex flex-col items-stretch gap-3">
+              <button
+                type="button"
+                onClick={() => handleExampleClick("reply to that email I've been avoiding")}
+                className="w-full rounded-full border border-amberAccent/70 bg-amber-50 px-6 py-3 text-sm font-medium text-amber-900 shadow-sm hover:bg-amber-100 hover:border-amberAccent transition-colors"
+              >
+                reply to that email I&apos;ve been avoiding
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExampleClick('start cleaning my room')}
+                className="w-full rounded-full border border-amberAccent/70 bg-amber-50 px-6 py-3 text-sm font-medium text-amber-900 shadow-sm hover:bg-amber-100 hover:border-amberAccent transition-colors"
+              >
+                start cleaning my room
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExampleClick('work on my project for 10 minutes')}
+                className="w-full rounded-full border border-amberAccent/70 bg-amber-50 px-6 py-3 text-sm font-medium text-amber-900 shadow-sm hover:bg-amber-100 hover:border-amberAccent transition-colors"
+              >
+                work on my project for 10 minutes
+              </button>
+            </div>
           </div>
         )}
         {messages.map((m) => (
@@ -216,7 +252,7 @@ export default function ChatScreen({
         <div ref={scrollBottomRef} />
       </div>
 
-      <div className="shrink-0 border-t border-amber-200/50 bg-cream px-4 py-3">
+      <div className="shrink-0 border-t border-amber-200/50 bg-cream px-5 py-4 md:px-6">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -234,15 +270,15 @@ export default function ChatScreen({
             onKeyDown={handleKeyDown}
             placeholder="what do you need to do?"
             disabled={isTyping || inputDisabled}
-            className="flex-1 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm text-warmText outline-none placeholder:text-neutral-400 focus:border-amberAccent focus:ring-2 focus:ring-amberAccent/30 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex-1 rounded-full border border-neutral-200 bg-white px-5 py-4 text-base text-warmText outline-none placeholder:text-neutral-400 focus:border-amberAccent focus:ring-2 focus:ring-amberAccent/30 disabled:opacity-70 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
             disabled={!input.trim() || isTyping || inputDisabled}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amberAccent text-white shadow-md transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amberAccent text-white shadow-md transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Send"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </button>
@@ -288,11 +324,11 @@ function MessageBubble({ message }) {
 
   if (role === 'user') {
     return (
-      <div className="mb-3 flex justify-end">
+      <div className="mb-5 flex w-full justify-end">
         <button
           type="button"
           onClick={() => setShowTime((s) => !s)}
-          className="max-w-[85%] rounded-2xl rounded-br-md bg-[#f97316] px-4 py-2.5 text-left text-sm text-white shadow-sm"
+          className="max-w-[85%] rounded-2xl rounded-br-md bg-[#f97316] px-5 py-3.5 text-left text-base text-white shadow-sm"
         >
           <span className="font-body">{content}</span>
           {showTime && timestamp && (
@@ -307,12 +343,12 @@ function MessageBubble({ message }) {
 
   if (role === 'assistant') {
     return (
-      <div className="mb-3 flex justify-start gap-2">
-        <span className="shrink-0 text-xl" aria-hidden>🧠</span>
+      <div className="mb-5 flex w-full justify-start gap-3">
+        <span className="shrink-0 text-2xl" aria-hidden>🧠</span>
         <button
           type="button"
           onClick={() => setShowTime((s) => !s)}
-          className="max-w-[85%] rounded-2xl rounded-bl-md bg-white px-4 py-2.5 text-left text-sm text-warmText shadow-sm"
+          className="max-w-[85%] rounded-2xl rounded-bl-md bg-white px-5 py-3.5 text-left text-base text-warmText shadow-sm"
         >
           <span className="font-heading">{content}</span>
           {showTime && timestamp && (
